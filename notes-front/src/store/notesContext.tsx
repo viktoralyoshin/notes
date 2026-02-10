@@ -18,7 +18,7 @@ const initialState: NotesState = {
   searchQuery: '',
   activeColor: null,
   showFavorites: false,
-  sortBy: 'newest',
+  sortBy: 'manual',
   isLoading: true,
 }
 
@@ -29,6 +29,7 @@ type NotesAction =
   | { type: 'ADD_NOTE'; payload: Note }
   | { type: 'UPDATE_NOTE'; payload: Note }
   | { type: 'DELETE_NOTE'; payload: string }
+  | { type: 'REORDER_NOTES'; payload: Note[] }
   | { type: 'SET_SEARCH_QUERY'; payload: string }
   | { type: 'SET_ACTIVE_COLOR'; payload: NoteColor | null }
   | { type: 'TOGGLE_FAVORITES' }
@@ -53,6 +54,8 @@ function notesReducer(state: NotesState, action: NotesAction): NotesState {
         ...state,
         notes: state.notes.filter((n) => n.id !== action.payload),
       }
+    case 'REORDER_NOTES':
+      return { ...state, notes: action.payload }
     case 'SET_SEARCH_QUERY':
       return { ...state, searchQuery: action.payload }
     case 'SET_ACTIVE_COLOR':
@@ -79,6 +82,7 @@ interface NotesContextValue {
   editNote: (id: string, input: { title?: string; content?: string; color?: NoteColor }) => Promise<void>
   toggleFavorite: (id: string) => Promise<void>
   removeNote: (id: string) => Promise<void>
+  reorderNotes: (reorderedNotes: Note[]) => Promise<void>
 }
 
 const NotesContext = createContext<NotesContextValue | null>(null)
@@ -123,6 +127,19 @@ export function NotesProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'DELETE_NOTE', payload: id })
   }, [])
 
+  const reorderNotes = useCallback(async (reorderedNotes: Note[]) => {
+    // Optimistic update
+    const updatedNotes = reorderedNotes.map((note, index) => ({ ...note, position: index }))
+    dispatch({ type: 'REORDER_NOTES', payload: updatedNotes })
+
+    try {
+      await notesApi.reorderNotes(updatedNotes.map((n) => n.id))
+    } catch {
+      // Revert on error by reloading
+      await loadNotes()
+    }
+  }, [loadNotes])
+
   // Compute filtered & sorted notes
   const colorOrder: Record<string, number> = { yellow: 0, orange: 1, purple: 2, blue: 3, green: 4 }
 
@@ -138,6 +155,8 @@ export function NotesProvider({ children }: { children: ReactNode }) {
     })
     .sort((a, b) => {
       switch (state.sortBy) {
+        case 'manual':
+          return a.position - b.position
         case 'newest':
           return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         case 'oldest':
@@ -154,7 +173,7 @@ export function NotesProvider({ children }: { children: ReactNode }) {
     })
 
   return (
-    <NotesContext.Provider value={{ state, dispatch, filteredNotes, loadNotes, addNote, editNote, toggleFavorite, removeNote }}>
+    <NotesContext.Provider value={{ state, dispatch, filteredNotes, loadNotes, addNote, editNote, toggleFavorite, removeNote, reorderNotes }}>
       {children}
     </NotesContext.Provider>
   )

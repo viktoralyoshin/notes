@@ -1,5 +1,21 @@
+import { useState, useCallback } from 'react'
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragOverlay,
+  type DragStartEvent,
+  type DragEndEvent,
+} from '@dnd-kit/core'
+import {
+  SortableContext,
+  rectSortingStrategy,
+} from '@dnd-kit/sortable'
 import type { Note } from '../../types'
-import NoteCard from '../NoteCard/NoteCard'
+import { SortableNoteCard, NoteCardContent } from '../NoteCard/NoteCard'
+import { useNotes } from '../../store/notesContext'
 
 interface NoteGridProps {
   notes: Note[]
@@ -20,6 +36,46 @@ function SkeletonCard() {
 }
 
 export default function NoteGrid({ notes, isLoading, onEdit, onDelete, onToggleFavorite }: NoteGridProps) {
+  const { state, reorderNotes } = useNotes()
+  const [activeNote, setActiveNote] = useState<Note | null>(null)
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+  )
+
+  const isDragEnabled = state.sortBy === 'manual'
+
+  const handleDragStart = useCallback((event: DragStartEvent) => {
+    const note = notes.find((n) => n.id === event.active.id)
+    if (note) setActiveNote(note)
+  }, [notes])
+
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
+    setActiveNote(null)
+    const { active, over } = event
+
+    if (!over || active.id === over.id) return
+
+    const oldIndex = notes.findIndex((n) => n.id === active.id)
+    const newIndex = notes.findIndex((n) => n.id === over.id)
+
+    if (oldIndex === -1 || newIndex === -1) return
+
+    const reordered = [...notes]
+    const [moved] = reordered.splice(oldIndex, 1)
+    reordered.splice(newIndex, 0, moved)
+
+    reorderNotes(reordered)
+  }, [notes, reorderNotes])
+
+  const handleDragCancel = useCallback(() => {
+    setActiveNote(null)
+  }, [])
+
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
@@ -47,18 +103,57 @@ export default function NoteGrid({ notes, isLoading, onEdit, onDelete, onToggleF
     )
   }
 
+  if (!isDragEnabled) {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+        {notes.map((note, index) => (
+          <NoteCardContent
+            key={note.id}
+            note={note}
+            index={index}
+            onEdit={onEdit}
+            onDelete={onDelete}
+            onToggleFavorite={onToggleFavorite}
+          />
+        ))}
+      </div>
+    )
+  }
+
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-      {notes.map((note, index) => (
-        <NoteCard
-          key={note.id}
-          note={note}
-          index={index}
-          onEdit={onEdit}
-          onDelete={onDelete}
-          onToggleFavorite={onToggleFavorite}
-        />
-      ))}
-    </div>
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+      onDragCancel={handleDragCancel}
+    >
+      <SortableContext items={notes.map((n) => n.id)} strategy={rectSortingStrategy}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+          {notes.map((note, index) => (
+            <SortableNoteCard
+              key={note.id}
+              note={note}
+              index={index}
+              onEdit={onEdit}
+              onDelete={onDelete}
+              onToggleFavorite={onToggleFavorite}
+            />
+          ))}
+        </div>
+      </SortableContext>
+      <DragOverlay>
+        {activeNote ? (
+          <NoteCardContent
+            note={activeNote}
+            index={0}
+            isDragOverlay
+            onEdit={() => {}}
+            onDelete={() => {}}
+            onToggleFavorite={() => {}}
+          />
+        ) : null}
+      </DragOverlay>
+    </DndContext>
   )
 }

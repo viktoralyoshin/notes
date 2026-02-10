@@ -1,5 +1,5 @@
 import type { FastifyInstance } from 'fastify'
-import type { CreateNoteInput, UpdateNoteInput, NotesQuery } from './notes.schema.js'
+import type { CreateNoteInput, UpdateNoteInput, ReorderNotesInput, NotesQuery } from './notes.schema.js'
 import type { Prisma } from '@prisma/client'
 
 export async function getNotes(fastify: FastifyInstance, userId: string, query: NotesQuery) {
@@ -22,7 +22,7 @@ export async function getNotes(fastify: FastifyInstance, userId: string, query: 
 
   return fastify.prisma.note.findMany({
     where,
-    orderBy: { createdAt: 'desc' },
+    orderBy: [{ position: 'asc' }, { createdAt: 'desc' }],
   })
 }
 
@@ -37,12 +37,19 @@ export async function getNoteById(fastify: FastifyInstance, id: string, userId: 
 }
 
 export async function createNote(fastify: FastifyInstance, userId: string, input: CreateNoteInput) {
+  // Shift all existing notes down by 1
+  await fastify.prisma.note.updateMany({
+    where: { userId },
+    data: { position: { increment: 1 } },
+  })
+
   return fastify.prisma.note.create({
     data: {
       title: input.title,
       content: input.content,
       color: input.color,
       isFavorite: input.isFavorite,
+      position: 0,
       userId,
     },
   })
@@ -73,5 +80,34 @@ export async function deleteNote(fastify: FastifyInstance, id: string, userId: s
   }
 
   await fastify.prisma.note.delete({ where: { id } })
+  return { success: true }
+}
+
+export async function reorderNotes(fastify: FastifyInstance, userId: string, input: ReorderNotesInput) {
+  const { orderedIds } = input
+
+  // Verify all notes belong to this user
+  const notes = await fastify.prisma.note.findMany({
+    where: { userId },
+    select: { id: true },
+  })
+  const userNoteIds = new Set(notes.map((n) => n.id))
+
+  for (const id of orderedIds) {
+    if (!userNoteIds.has(id)) {
+      throw { statusCode: 400, message: `Note ${id} not found or not owned by user` }
+    }
+  }
+
+  // Batch update positions
+  await fastify.prisma.$transaction(
+    orderedIds.map((id, index) =>
+      fastify.prisma.note.update({
+        where: { id },
+        data: { position: index },
+      }),
+    ),
+  )
+
   return { success: true }
 }

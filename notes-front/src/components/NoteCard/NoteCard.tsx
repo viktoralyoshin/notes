@@ -1,9 +1,13 @@
+import { forwardRef } from 'react'
+import { useSortable } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import type { Note } from '../../types'
 import { NOTE_COLORS } from '../../types'
 
 interface NoteCardProps {
   note: Note
   index: number
+  isDragOverlay?: boolean
   onEdit: (note: Note) => void
   onDelete: (id: string) => void
   onToggleFavorite: (id: string) => void
@@ -18,12 +22,28 @@ function formatDate(dateStr: string): string {
   })
 }
 
-export default function NoteCard({ note, index, onEdit, onDelete, onToggleFavorite }: NoteCardProps) {
+const NoteCardContent = forwardRef<
+  HTMLDivElement,
+  NoteCardProps & {
+    style?: React.CSSProperties
+    isDragging?: boolean
+    listeners?: Record<string, Function>
+    attributes?: Record<string, any>
+  }
+>(({ note, index, isDragOverlay, style, isDragging, listeners, attributes, onEdit, onDelete, onToggleFavorite }, ref) => {
   return (
     <div
-      className={`note-card ${NOTE_COLORS[note.color].bg} rounded-2xl p-5 min-h-[180px] flex flex-col justify-between relative group transition-all duration-200 hover:scale-[1.02] hover:shadow-lg dark:hover:shadow-black/30 cursor-pointer dark:opacity-90`}
-      style={{ animationDelay: `${index * 50}ms` }}
-      onClick={() => onEdit(note)}
+      ref={ref}
+      className={`note-card ${NOTE_COLORS[note.color].bg} rounded-2xl p-5 min-h-[180px] flex flex-col justify-between relative group transition-all duration-200 hover:scale-[1.02] hover:shadow-lg dark:hover:shadow-black/30 cursor-pointer dark:opacity-90 ${
+        isDragging ? 'opacity-40' : ''
+      } ${isDragOverlay ? 'shadow-2xl scale-105 rotate-2' : ''}`}
+      style={{
+        ...style,
+        animationDelay: isDragOverlay ? '0ms' : `${index * 50}ms`,
+      }}
+      onClick={() => !isDragging && onEdit(note)}
+      {...attributes}
+      {...listeners}
     >
       {/* Favorite star */}
       <button
@@ -111,4 +131,39 @@ export default function NoteCard({ note, index, onEdit, onDelete, onToggleFavori
       </div>
     </div>
   )
+})
+
+NoteCardContent.displayName = 'NoteCardContent'
+
+export function SortableNoteCard(props: NoteCardProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: props.note.id })
+
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  }
+
+  return (
+    <NoteCardContent
+      ref={setNodeRef}
+      style={style}
+      isDragging={isDragging}
+      listeners={listeners}
+      attributes={attributes}
+      {...props}
+    />
+  )
 }
+
+export default function NoteCard(props: NoteCardProps) {
+  return <NoteCardContent {...props} />
+}
+
+export { NoteCardContent }

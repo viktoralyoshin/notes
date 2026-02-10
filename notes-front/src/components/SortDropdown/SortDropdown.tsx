@@ -3,6 +3,7 @@ import { useNotes } from '../../store/notesContext'
 import type { SortOption } from '../../types'
 
 const sortOptions: { value: SortOption; label: string }[] = [
+  { value: 'manual', label: 'Manual' },
   { value: 'newest', label: 'Newest first' },
   { value: 'oldest', label: 'Oldest first' },
   { value: 'title-asc', label: 'Title A-Z' },

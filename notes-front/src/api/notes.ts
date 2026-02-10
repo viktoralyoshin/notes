@@ -7,6 +7,7 @@ interface ApiNote {
   content: string
   color: string
   isFavorite: boolean
+  position: number
   userId: string
   createdAt: string
   updatedAt: string
@@ -19,6 +20,7 @@ function toNote(apiNote: ApiNote): Note {
     content: apiNote.content,
     color: apiNote.color as NoteColor,
     isFavorite: apiNote.isFavorite,
+    position: apiNote.position,
     createdAt: apiNote.createdAt,
     updatedAt: apiNote.updatedAt,
   }
@@ -47,4 +49,8 @@ export async function updateNote(id: string, input: { title?: string; content?: 
 
 export async function deleteNote(id: string): Promise<void> {
   await api.delete(`/notes/${id}`)
+}
+
+export async function reorderNotes(orderedIds: string[]): Promise<void> {
+  await api.patch('/notes/reorder', { orderedIds })
 }

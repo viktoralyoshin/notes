@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify'
-import { createNoteSchema, updateNoteSchema, notesQuerySchema } from './notes.schema.js'
-import { getNotes, getNoteById, createNote, updateNote, deleteNote } from './notes.service.js'
+import { createNoteSchema, updateNoteSchema, notesQuerySchema, reorderNotesSchema } from './notes.schema.js'
+import { getNotes, getNoteById, createNote, updateNote, deleteNote, reorderNotes } from './notes.service.js'
 import type { JwtPayload } from '../../types/index.js'
 
 export default async function notesRoutes(fastify: FastifyInstance) {
@@ -56,6 +56,23 @@ export default async function notesRoutes(fastify: FastifyInstance) {
     try {
       const note = await updateNote(fastify, id, userId, parsed.data)
       return reply.send(note)
+    } catch (err: any) {
+      return reply.status(err.statusCode || 500).send({ error: err.message })
+    }
+  })
+
+  // PATCH /api/notes/reorder
+  fastify.patch('/reorder', async (request, reply) => {
+    const { id: userId } = request.user as JwtPayload
+    const parsed = reorderNotesSchema.safeParse(request.body)
+
+    if (!parsed.success) {
+      return reply.status(400).send({ error: 'Validation error', details: parsed.error.flatten() })
+    }
+
+    try {
+      const result = await reorderNotes(fastify, userId, parsed.data)
+      return reply.send(result)
     } catch (err: any) {
       return reply.status(err.statusCode || 500).send({ error: err.message })
     }

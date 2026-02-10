@@ -14,6 +14,11 @@ export const updateNoteSchema = z.object({
   content: z.string().optional(),
   color: noteColorEnum.optional(),
   isFavorite: z.boolean().optional(),
+  position: z.number().int().min(0).optional(),
+})
+
+export const reorderNotesSchema = z.object({
+  orderedIds: z.array(z.string().uuid()),
 })
 
 export const notesQuerySchema = z.object({
@@ -24,4 +29,5 @@ export const notesQuerySchema = z.object({
 
 export type CreateNoteInput = z.infer<typeof createNoteSchema>
 export type UpdateNoteInput = z.infer<typeof updateNoteSchema>
+export type ReorderNotesInput = z.infer<typeof reorderNotesSchema>
 export type NotesQuery = z.infer<typeof notesQuerySchema>

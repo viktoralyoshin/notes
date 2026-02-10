@@ -1,6 +1,6 @@
 export type NoteColor = 'yellow' | 'orange' | 'purple' | 'green' | 'blue'
 
-export type SortOption = 'newest' | 'oldest' | 'title-asc' | 'title-desc' | 'color'
+export type SortOption = 'manual' | 'newest' | 'oldest' | 'title-asc' | 'title-desc' | 'color'
 
 export interface Note {
   id: string
@@ -8,6 +8,7 @@ export interface Note {
   content: string
   color: NoteColor
   isFavorite: boolean
+  position: number
   createdAt: string
   updatedAt: string
 }
