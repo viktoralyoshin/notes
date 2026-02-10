@@ -1,6 +1,6 @@
-import { createContext, useContext, useReducer, useEffect, type ReactNode } from 'react'
+import { createContext, useContext, useReducer, useEffect, useCallback, type ReactNode } from 'react'
 import type { Note, NoteColor } from '../types'
-import { mockNotes } from '../data/mockNotes'
+import * as notesApi from '../api/notes'
 
 // --- State ---
 
@@ -8,43 +8,31 @@ interface NotesState {
   notes: Note[]
   searchQuery: string
   activeColor: NoteColor | null
-}
-
-const STORAGE_KEY = 'docket-notes'
-
-function loadNotes(): Note[] {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY)
-    if (stored) {
-      return JSON.parse(stored)
-    }
-  } catch {
-    // ignore parse errors
-  }
-  return mockNotes
-}
-
-function saveNotes(notes: Note[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(notes))
+  isLoading: boolean
 }
 
 const initialState: NotesState = {
-  notes: loadNotes(),
+  notes: [],
   searchQuery: '',
   activeColor: null,
+  isLoading: true,
 }
 
 // --- Actions ---
 
 type NotesAction =
+  | { type: 'SET_NOTES'; payload: Note[] }
   | { type: 'ADD_NOTE'; payload: Note }
   | { type: 'UPDATE_NOTE'; payload: Note }
   | { type: 'DELETE_NOTE'; payload: string }
   | { type: 'SET_SEARCH_QUERY'; payload: string }
   | { type: 'SET_ACTIVE_COLOR'; payload: NoteColor | null }
+  | { type: 'SET_LOADING'; payload: boolean }
 
 function notesReducer(state: NotesState, action: NotesAction): NotesState {
   switch (action.type) {
+    case 'SET_NOTES':
+      return { ...state, notes: action.payload, isLoading: false }
     case 'ADD_NOTE':
       return { ...state, notes: [action.payload, ...state.notes] }
     case 'UPDATE_NOTE':
@@ -63,6 +51,8 @@ function notesReducer(state: NotesState, action: NotesAction): NotesState {
       return { ...state, searchQuery: action.payload }
     case 'SET_ACTIVE_COLOR':
       return { ...state, activeColor: action.payload }
+    case 'SET_LOADING':
+      return { ...state, isLoading: action.payload }
     default:
       return state
   }
@@ -74,6 +64,10 @@ interface NotesContextValue {
   state: NotesState
   dispatch: React.Dispatch<NotesAction>
   filteredNotes: Note[]
+  loadNotes: () => Promise<void>
+  addNote: (input: { title: string; content: string; color: NoteColor }) => Promise<void>
+  editNote: (id: string, input: { title?: string; content?: string; color?: NoteColor }) => Promise<void>
+  removeNote: (id: string) => Promise<void>
 }
 
 const NotesContext = createContext<NotesContextValue | null>(null)
@@ -81,12 +75,37 @@ const NotesContext = createContext<NotesContextValue | null>(null)
 export function NotesProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(notesReducer, initialState)
 
-  // Persist notes to localStorage
-  useEffect(() => {
-    saveNotes(state.notes)
-  }, [state.notes])
+  const loadNotes = useCallback(async () => {
+    dispatch({ type: 'SET_LOADING', payload: true })
+    try {
+      const notes = await notesApi.fetchNotes()
+      dispatch({ type: 'SET_NOTES', payload: notes })
+    } catch {
+      dispatch({ type: 'SET_LOADING', payload: false })
+    }
+  }, [])
 
-  // Compute filtered notes
+  // Load notes on mount
+  useEffect(() => {
+    loadNotes()
+  }, [loadNotes])
+
+  const addNote = useCallback(async (input: { title: string; content: string; color: NoteColor }) => {
+    const note = await notesApi.createNote(input)
+    dispatch({ type: 'ADD_NOTE', payload: note })
+  }, [])
+
+  const editNote = useCallback(async (id: string, input: { title?: string; content?: string; color?: NoteColor }) => {
+    const note = await notesApi.updateNote(id, input)
+    dispatch({ type: 'UPDATE_NOTE', payload: note })
+  }, [])
+
+  const removeNote = useCallback(async (id: string) => {
+    await notesApi.deleteNote(id)
+    dispatch({ type: 'DELETE_NOTE', payload: id })
+  }, [])
+
+  // Compute filtered notes (search + color filter on client side for instant feedback)
   const filteredNotes = state.notes.filter((note) => {
     const matchesColor = !state.activeColor || note.color === state.activeColor
     const matchesSearch =
@@ -97,7 +116,7 @@ export function NotesProvider({ children }: { children: ReactNode }) {
   })
 
   return (
-    <NotesContext.Provider value={{ state, dispatch, filteredNotes }}>
+    <NotesContext.Provider value={{ state, dispatch, filteredNotes, loadNotes, addNote, editNote, removeNote }}>
       {children}
     </NotesContext.Provider>
   )

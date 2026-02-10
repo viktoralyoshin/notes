@@ -1,12 +1,14 @@
 import { useState } from 'react'
+import { AuthProvider, useAuth } from './store/authContext'
 import { NotesProvider, useNotes } from './store/notesContext'
 import Layout from './components/Layout/Layout'
 import NoteGrid from './components/NoteGrid/NoteGrid'
 import NoteEditor from './components/NoteEditor/NoteEditor'
+import AuthPage from './components/Auth/AuthPage'
 import type { Note, NoteColor } from './types'
 
 function NotesApp() {
-  const { filteredNotes, dispatch } = useNotes()
+  const { filteredNotes, addNote, editNote, removeNote } = useNotes()
   const [editorOpen, setEditorOpen] = useState(false)
   const [editingNote, setEditingNote] = useState<Note | null>(null)
 
@@ -20,32 +22,15 @@ function NotesApp() {
     setEditorOpen(true)
   }
 
-  const handleDelete = (id: string) => {
-    dispatch({ type: 'DELETE_NOTE', payload: id })
+  const handleDelete = async (id: string) => {
+    await removeNote(id)
   }
 
-  const handleSave = (data: { title: string; content: string; color: NoteColor }) => {
-    const now = new Date().toISOString().split('T')[0]
-
+  const handleSave = async (data: { title: string; content: string; color: NoteColor }) => {
     if (editingNote) {
-      dispatch({
-        type: 'UPDATE_NOTE',
-        payload: {
-          ...editingNote,
-          ...data,
-          updatedAt: now,
-        },
-      })
+      await editNote(editingNote.id, data)
     } else {
-      dispatch({
-        type: 'ADD_NOTE',
-        payload: {
-          id: crypto.randomUUID(),
-          ...data,
-          createdAt: now,
-          updatedAt: now,
-        },
-      })
+      await addNote(data)
     }
   }
 
@@ -68,11 +53,33 @@ function NotesApp() {
   )
 }
 
-function App() {
+function AppContent() {
+  const { isAuthenticated, isLoading } = useAuth()
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-gray-400 text-sm">Loading...</div>
+      </div>
+    )
+  }
+
+  if (!isAuthenticated) {
+    return <AuthPage />
+  }
+
   return (
     <NotesProvider>
       <NotesApp />
     </NotesProvider>
+  )
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   )
 }
 
