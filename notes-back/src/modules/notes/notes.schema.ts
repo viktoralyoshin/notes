@@ -6,17 +6,20 @@ export const createNoteSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   content: z.string().default(''),
   color: noteColorEnum.default('yellow'),
+  isFavorite: z.boolean().default(false),
 })
 
 export const updateNoteSchema = z.object({
   title: z.string().min(1).optional(),
   content: z.string().optional(),
   color: noteColorEnum.optional(),
+  isFavorite: z.boolean().optional(),
 })
 
 export const notesQuerySchema = z.object({
   color: noteColorEnum.optional(),
   search: z.string().optional(),
+  favorite: z.enum(['true', 'false']).optional(),
 })
 
 export type CreateNoteInput = z.infer<typeof createNoteSchema>

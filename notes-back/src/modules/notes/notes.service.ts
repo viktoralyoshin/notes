@@ -9,6 +9,10 @@ export async function getNotes(fastify: FastifyInstance, userId: string, query: 
     where.color = query.color
   }
 
+  if (query.favorite === 'true') {
+    where.isFavorite = true
+  }
+
   if (query.search) {
     where.OR = [
       { title: { contains: query.search, mode: 'insensitive' } },
@@ -38,6 +42,7 @@ export async function createNote(fastify: FastifyInstance, userId: string, input
       title: input.title,
       content: input.content,
       color: input.color,
+      isFavorite: input.isFavorite,
       userId,
     },
   })

@@ -10,7 +10,7 @@ import AuthPage from './components/Auth/AuthPage'
 import type { Note, NoteColor } from './types'
 
 function NotesApp() {
-  const { state, filteredNotes, addNote, editNote, removeNote } = useNotes()
+  const { state, filteredNotes, addNote, editNote, toggleFavorite, removeNote } = useNotes()
   const [editorOpen, setEditorOpen] = useState(false)
   const [editingNote, setEditingNote] = useState<Note | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
@@ -62,6 +62,7 @@ function NotesApp() {
           isLoading={state.isLoading}
           onEdit={handleEdit}
           onDelete={handleDeleteRequest}
+          onToggleFavorite={toggleFavorite}
         />
       </Layout>
       <NoteEditor

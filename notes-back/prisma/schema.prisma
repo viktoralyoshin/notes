@@ -20,14 +20,15 @@ model User {
 }
 
 model Note {
-  id        String   @id @default(uuid())
-  title     String
-  content   String   @default("")
-  color     String   @default("yellow")
-  userId    String   @map("user_id")
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id         String   @id @default(uuid())
+  title      String
+  content    String   @default("")
+  color      String   @default("yellow")
+  isFavorite Boolean  @default(false) @map("is_favorite")
+  userId     String   @map("user_id")
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
 
   @@map("notes")
 }

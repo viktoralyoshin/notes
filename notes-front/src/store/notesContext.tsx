@@ -8,6 +8,7 @@ interface NotesState {
   notes: Note[]
   searchQuery: string
   activeColor: NoteColor | null
+  showFavorites: boolean
   isLoading: boolean
 }
 
@@ -15,6 +16,7 @@ const initialState: NotesState = {
   notes: [],
   searchQuery: '',
   activeColor: null,
+  showFavorites: false,
   isLoading: true,
 }
 
@@ -27,6 +29,7 @@ type NotesAction =
   | { type: 'DELETE_NOTE'; payload: string }
   | { type: 'SET_SEARCH_QUERY'; payload: string }
   | { type: 'SET_ACTIVE_COLOR'; payload: NoteColor | null }
+  | { type: 'TOGGLE_FAVORITES' }
   | { type: 'SET_LOADING'; payload: boolean }
 
 function notesReducer(state: NotesState, action: NotesAction): NotesState {
@@ -51,6 +54,8 @@ function notesReducer(state: NotesState, action: NotesAction): NotesState {
       return { ...state, searchQuery: action.payload }
     case 'SET_ACTIVE_COLOR':
       return { ...state, activeColor: action.payload }
+    case 'TOGGLE_FAVORITES':
+      return { ...state, showFavorites: !state.showFavorites }
     case 'SET_LOADING':
       return { ...state, isLoading: action.payload }
     default:
@@ -67,6 +72,7 @@ interface NotesContextValue {
   loadNotes: () => Promise<void>
   addNote: (input: { title: string; content: string; color: NoteColor }) => Promise<void>
   editNote: (id: string, input: { title?: string; content?: string; color?: NoteColor }) => Promise<void>
+  toggleFavorite: (id: string) => Promise<void>
   removeNote: (id: string) => Promise<void>
 }
 
@@ -100,23 +106,31 @@ export function NotesProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'UPDATE_NOTE', payload: note })
   }, [])
 
+  const toggleFavorite = useCallback(async (id: string) => {
+    const existing = state.notes.find((n) => n.id === id)
+    if (!existing) return
+    const note = await notesApi.updateNote(id, { isFavorite: !existing.isFavorite })
+    dispatch({ type: 'UPDATE_NOTE', payload: note })
+  }, [state.notes])
+
   const removeNote = useCallback(async (id: string) => {
     await notesApi.deleteNote(id)
     dispatch({ type: 'DELETE_NOTE', payload: id })
   }, [])
 
-  // Compute filtered notes (search + color filter on client side for instant feedback)
+  // Compute filtered notes
   const filteredNotes = state.notes.filter((note) => {
     const matchesColor = !state.activeColor || note.color === state.activeColor
+    const matchesFavorite = !state.showFavorites || note.isFavorite
     const matchesSearch =
       !state.searchQuery ||
       note.title.toLowerCase().includes(state.searchQuery.toLowerCase()) ||
       note.content.toLowerCase().includes(state.searchQuery.toLowerCase())
-    return matchesColor && matchesSearch
+    return matchesColor && matchesFavorite && matchesSearch
   })
 
   return (
-    <NotesContext.Provider value={{ state, dispatch, filteredNotes, loadNotes, addNote, editNote, removeNote }}>
+    <NotesContext.Provider value={{ state, dispatch, filteredNotes, loadNotes, addNote, editNote, toggleFavorite, removeNote }}>
       {children}
     </NotesContext.Provider>
   )

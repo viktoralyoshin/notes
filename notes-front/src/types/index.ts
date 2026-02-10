@@ -5,6 +5,7 @@ export interface Note {
   title: string
   content: string
   color: NoteColor
+  isFavorite: boolean
   createdAt: string
   updatedAt: string
 }

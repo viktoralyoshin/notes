@@ -6,6 +6,7 @@ interface ApiNote {
   title: string
   content: string
   color: string
+  isFavorite: boolean
   userId: string
   createdAt: string
   updatedAt: string
@@ -17,6 +18,7 @@ function toNote(apiNote: ApiNote): Note {
     title: apiNote.title,
     content: apiNote.content,
     color: apiNote.color as NoteColor,
+    isFavorite: apiNote.isFavorite,
     createdAt: apiNote.createdAt,
     updatedAt: apiNote.updatedAt,
   }
@@ -38,7 +40,7 @@ export async function createNote(input: { title: string; content: string; color:
   return toNote(data)
 }
 
-export async function updateNote(id: string, input: { title?: string; content?: string; color?: NoteColor }): Promise<Note> {
+export async function updateNote(id: string, input: { title?: string; content?: string; color?: NoteColor; isFavorite?: boolean }): Promise<Note> {
   const data = await api.patch<ApiNote>(`/notes/${id}`, input)
   return toNote(data)
 }

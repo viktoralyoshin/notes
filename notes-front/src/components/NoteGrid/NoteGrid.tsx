@@ -6,6 +6,7 @@ interface NoteGridProps {
   isLoading?: boolean
   onEdit: (note: Note) => void
   onDelete: (id: string) => void
+  onToggleFavorite: (id: string) => void
 }
 
 function SkeletonCard() {
@@ -18,7 +19,7 @@ function SkeletonCard() {
   )
 }
 
-export default function NoteGrid({ notes, isLoading, onEdit, onDelete }: NoteGridProps) {
+export default function NoteGrid({ notes, isLoading, onEdit, onDelete, onToggleFavorite }: NoteGridProps) {
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
@@ -55,6 +56,7 @@ export default function NoteGrid({ notes, isLoading, onEdit, onDelete }: NoteGri
           index={index}
           onEdit={onEdit}
           onDelete={onDelete}
+          onToggleFavorite={onToggleFavorite}
         />
       ))}
     </div>
