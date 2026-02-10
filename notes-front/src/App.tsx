@@ -1,16 +1,19 @@
 import { useState } from 'react'
+import { toast } from 'sonner'
 import { AuthProvider, useAuth } from './store/authContext'
 import { NotesProvider, useNotes } from './store/notesContext'
 import Layout from './components/Layout/Layout'
 import NoteGrid from './components/NoteGrid/NoteGrid'
 import NoteEditor from './components/NoteEditor/NoteEditor'
+import ConfirmDialog from './components/ConfirmDialog/ConfirmDialog'
 import AuthPage from './components/Auth/AuthPage'
 import type { Note, NoteColor } from './types'
 
 function NotesApp() {
-  const { filteredNotes, addNote, editNote, removeNote } = useNotes()
+  const { state, filteredNotes, addNote, editNote, removeNote } = useNotes()
   const [editorOpen, setEditorOpen] = useState(false)
   const [editingNote, setEditingNote] = useState<Note | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
 
   const handleAddNote = () => {
     setEditingNote(null)
@@ -22,15 +25,32 @@ function NotesApp() {
     setEditorOpen(true)
   }
 
-  const handleDelete = async (id: string) => {
-    await removeNote(id)
+  const handleDeleteRequest = (id: string) => {
+    setDeleteTarget(id)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget) return
+    try {
+      await removeNote(deleteTarget)
+      toast.success('Note deleted')
+    } catch {
+      toast.error('Failed to delete note')
+    }
+    setDeleteTarget(null)
   }
 
   const handleSave = async (data: { title: string; content: string; color: NoteColor }) => {
-    if (editingNote) {
-      await editNote(editingNote.id, data)
-    } else {
-      await addNote(data)
+    try {
+      if (editingNote) {
+        await editNote(editingNote.id, data)
+        toast.success('Note updated')
+      } else {
+        await addNote(data)
+        toast.success('Note created')
+      }
+    } catch {
+      toast.error('Failed to save note')
     }
   }
 
@@ -39,8 +59,9 @@ function NotesApp() {
       <Layout onAddNote={handleAddNote}>
         <NoteGrid
           notes={filteredNotes}
+          isLoading={state.isLoading}
           onEdit={handleEdit}
-          onDelete={handleDelete}
+          onDelete={handleDeleteRequest}
         />
       </Layout>
       <NoteEditor
@@ -48,6 +69,13 @@ function NotesApp() {
         isOpen={editorOpen}
         onClose={() => setEditorOpen(false)}
         onSave={handleSave}
+      />
+      <ConfirmDialog
+        isOpen={!!deleteTarget}
+        title="Delete note"
+        message="Are you sure you want to delete this note? This action cannot be undone."
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setDeleteTarget(null)}
       />
     </>
   )

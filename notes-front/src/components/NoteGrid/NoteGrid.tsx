@@ -3,11 +3,32 @@ import NoteCard from '../NoteCard/NoteCard'
 
 interface NoteGridProps {
   notes: Note[]
+  isLoading?: boolean
   onEdit: (note: Note) => void
   onDelete: (id: string) => void
 }
 
-export default function NoteGrid({ notes, onEdit, onDelete }: NoteGridProps) {
+function SkeletonCard() {
+  return (
+    <div className="rounded-2xl p-5 min-h-[180px] bg-gray-200 animate-pulse">
+      <div className="h-4 bg-gray-300 rounded w-3/4 mb-3" />
+      <div className="h-3 bg-gray-300 rounded w-full mb-2" />
+      <div className="h-3 bg-gray-300 rounded w-2/3" />
+    </div>
+  )
+}
+
+export default function NoteGrid({ notes, isLoading, onEdit, onDelete }: NoteGridProps) {
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <SkeletonCard key={i} />
+        ))}
+      </div>
+    )
+  }
+
   if (notes.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-gray-400 animate-fade-in">
