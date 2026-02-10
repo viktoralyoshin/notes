@@ -11,10 +11,10 @@ interface NoteGridProps {
 
 function SkeletonCard() {
   return (
-    <div className="rounded-2xl p-5 min-h-[180px] bg-gray-200 animate-pulse">
-      <div className="h-4 bg-gray-300 rounded w-3/4 mb-3" />
-      <div className="h-3 bg-gray-300 rounded w-full mb-2" />
-      <div className="h-3 bg-gray-300 rounded w-2/3" />
+    <div className="rounded-2xl p-5 min-h-[180px] bg-gray-200 dark:bg-[#333] animate-pulse">
+      <div className="h-4 bg-gray-300 dark:bg-[#444] rounded w-3/4 mb-3" />
+      <div className="h-3 bg-gray-300 dark:bg-[#444] rounded w-full mb-2" />
+      <div className="h-3 bg-gray-300 dark:bg-[#444] rounded w-2/3" />
     </div>
   )
 }
@@ -32,7 +32,7 @@ export default function NoteGrid({ notes, isLoading, onEdit, onDelete, onToggleF
 
   if (notes.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-gray-400 animate-fade-in">
+      <div className="flex flex-col items-center justify-center py-20 text-gray-400 dark:text-gray-500 animate-fade-in">
         <svg className="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path
             strokeLinecap="round"

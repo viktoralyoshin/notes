@@ -29,17 +29,17 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#111111] flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Docket</h1>
-          <p className="text-gray-500 text-sm mt-1">Your notes, organized</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Docket</h1>
+          <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Your notes, organized</p>
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-          <h2 className="text-lg font-semibold text-gray-800 mb-5">
+        <div className="bg-white dark:bg-[#1a1a1a] rounded-2xl shadow-sm border border-gray-100 dark:border-[#2a2a2a] p-6">
+          <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-5">
             {isLogin ? 'Sign in' : 'Create account'}
           </h2>
 
@@ -50,7 +50,7 @@ export default function AuthPage() {
                 placeholder="Name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-lg bg-gray-50 text-sm text-gray-700 placeholder-gray-400 outline-none border border-gray-200 focus:border-gray-400 transition-colors"
+                className="w-full px-4 py-2.5 rounded-lg bg-gray-50 dark:bg-[#111111] text-sm text-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 outline-none border border-gray-200 dark:border-[#333] focus:border-gray-400 dark:focus:border-gray-500 transition-colors"
               />
             )}
 
@@ -60,7 +60,7 @@ export default function AuthPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full px-4 py-2.5 rounded-lg bg-gray-50 text-sm text-gray-700 placeholder-gray-400 outline-none border border-gray-200 focus:border-gray-400 transition-colors"
+              className="w-full px-4 py-2.5 rounded-lg bg-gray-50 dark:bg-[#111111] text-sm text-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 outline-none border border-gray-200 dark:border-[#333] focus:border-gray-400 dark:focus:border-gray-500 transition-colors"
             />
 
             <input
@@ -70,7 +70,7 @@ export default function AuthPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               minLength={6}
-              className="w-full px-4 py-2.5 rounded-lg bg-gray-50 text-sm text-gray-700 placeholder-gray-400 outline-none border border-gray-200 focus:border-gray-400 transition-colors"
+              className="w-full px-4 py-2.5 rounded-lg bg-gray-50 dark:bg-[#111111] text-sm text-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 outline-none border border-gray-200 dark:border-[#333] focus:border-gray-400 dark:focus:border-gray-500 transition-colors"
             />
 
             {error && (
@@ -80,7 +80,7 @@ export default function AuthPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2.5 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50 cursor-pointer"
+              className="w-full py-2.5 bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-sm font-medium rounded-lg hover:bg-gray-700 dark:hover:bg-gray-200 transition-colors disabled:opacity-50 cursor-pointer"
             >
               {loading ? '...' : isLogin ? 'Sign in' : 'Sign up'}
             </button>
@@ -92,7 +92,7 @@ export default function AuthPage() {
                 setIsLogin(!isLogin)
                 setError('')
               }}
-              className="text-xs text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
+              className="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors cursor-pointer"
             >
               {isLogin ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
             </button>
@@ -100,7 +100,7 @@ export default function AuthPage() {
         </div>
 
         {/* Demo credentials hint */}
-        <p className="text-center text-xs text-gray-400 mt-4">
+        <p className="text-center text-xs text-gray-400 dark:text-gray-500 mt-4">
           Demo: demo@docket.app / demo123
         </p>
       </div>

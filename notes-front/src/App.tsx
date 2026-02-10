@@ -93,8 +93,8 @@ function AppContent() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-gray-400 text-sm">Loading...</div>
+      <div className="min-h-screen bg-gray-50 dark:bg-[#111111] flex items-center justify-center">
+        <div className="text-gray-400 dark:text-gray-500 text-sm">Loading...</div>
       </div>
     )
   }

@@ -57,7 +57,7 @@ export default function NoteEditor({ note, isOpen, onClose, onSave }: NoteEditor
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-fade-in"
       onClick={handleBackdropClick}
     >
-      <div className={`${NOTE_COLORS[color].bg} rounded-2xl p-6 w-full max-w-lg mx-4 shadow-xl animate-modal-in transition-colors duration-300`}>
+      <div className={`${NOTE_COLORS[color].bg} rounded-2xl p-6 w-full max-w-lg mx-4 shadow-xl dark:shadow-black/40 animate-modal-in transition-colors duration-300 dark:opacity-90`}>
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-gray-800">

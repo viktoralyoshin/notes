@@ -6,7 +6,7 @@ export default function SearchBar() {
   return (
     <div className="relative w-full max-w-md">
       <svg
-        className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+        className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500"
         fill="none"
         stroke="currentColor"
         viewBox="0 0 24 24"
@@ -25,7 +25,7 @@ export default function SearchBar() {
         onChange={(e) =>
           dispatch({ type: 'SET_SEARCH_QUERY', payload: e.target.value })
         }
-        className="w-full pl-10 pr-4 py-2 rounded-lg bg-gray-100 text-sm text-gray-700 placeholder-gray-400 outline-none focus:ring-2 focus:ring-gray-300 transition-all"
+        className="w-full pl-10 pr-4 py-2 rounded-lg bg-gray-100 dark:bg-[#2a2a2a] text-sm text-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 outline-none focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-600 transition-all"
       />
     </div>
   )

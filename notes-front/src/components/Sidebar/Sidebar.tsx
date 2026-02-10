@@ -1,4 +1,5 @@
 import { useNotes } from '../../store/notesContext'
+import { useDarkMode } from '../../hooks/useDarkMode'
 import { NOTE_COLORS, type NoteColor } from '../../types'
 
 interface SidebarProps {
@@ -10,6 +11,7 @@ const colorOrder: NoteColor[] = ['yellow', 'orange', 'purple', 'blue', 'green']
 
 export default function Sidebar({ onAddNote, onOpenProfile }: SidebarProps) {
   const { state, dispatch } = useNotes()
+  const { isDark, toggle: toggleDark } = useDarkMode()
 
   const handleColorClick = (color: NoteColor) => {
     dispatch({
@@ -21,16 +23,16 @@ export default function Sidebar({ onAddNote, onOpenProfile }: SidebarProps) {
   return (
     <>
       {/* Desktop sidebar */}
-      <aside className="hidden md:flex flex-col items-center gap-6 py-8 px-4 w-20 min-h-screen bg-white border-r border-gray-100 shrink-0">
+      <aside className="hidden md:flex flex-col items-center gap-6 py-8 px-4 w-20 min-h-screen bg-white dark:bg-[#1a1a1a] border-r border-gray-100 dark:border-[#2a2a2a] shrink-0">
         {/* Logo */}
         <div className="mb-2">
-          <span className="text-xs font-semibold text-gray-500 tracking-wide">Docket</span>
+          <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 tracking-wide">Docket</span>
         </div>
 
         {/* Add button */}
         <button
           onClick={onAddNote}
-          className="w-10 h-10 rounded-full bg-gray-900 text-white flex items-center justify-center text-xl hover:bg-gray-700 transition-colors cursor-pointer shadow-md"
+          className="w-10 h-10 rounded-full bg-gray-900 dark:bg-white text-white dark:text-gray-900 flex items-center justify-center text-xl hover:bg-gray-700 dark:hover:bg-gray-200 transition-colors cursor-pointer shadow-md"
           aria-label="Add note"
         >
           +
@@ -44,7 +46,7 @@ export default function Sidebar({ onAddNote, onOpenProfile }: SidebarProps) {
               onClick={() => handleColorClick(color)}
               className={`w-5 h-5 rounded-full ${NOTE_COLORS[color].dot} transition-all cursor-pointer ${
                 state.activeColor === color
-                  ? 'ring-2 ring-offset-2 ring-gray-400 scale-110'
+                  ? 'ring-2 ring-offset-2 ring-gray-400 dark:ring-gray-500 scale-110'
                   : 'hover:scale-110'
               }`}
               aria-label={`Filter by ${NOTE_COLORS[color].label}`}
@@ -57,8 +59,8 @@ export default function Sidebar({ onAddNote, onOpenProfile }: SidebarProps) {
           onClick={() => dispatch({ type: 'TOGGLE_FAVORITES' })}
           className={`w-9 h-9 rounded-full flex items-center justify-center transition-all cursor-pointer mt-2 ${
             state.showFavorites
-              ? 'bg-gray-900 text-white'
-              : 'bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-600'
+              ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900'
+              : 'bg-gray-100 dark:bg-[#2a2a2a] text-gray-400 dark:text-gray-500 hover:bg-gray-200 dark:hover:bg-[#333] hover:text-gray-600 dark:hover:text-gray-300'
           }`}
           aria-label="Toggle favorites"
           title="Favorites"
@@ -71,10 +73,28 @@ export default function Sidebar({ onAddNote, onOpenProfile }: SidebarProps) {
         {/* Spacer */}
         <div className="flex-1" />
 
+        {/* Dark mode toggle */}
+        <button
+          onClick={toggleDark}
+          className="w-9 h-9 rounded-full bg-gray-100 dark:bg-[#2a2a2a] text-gray-500 dark:text-gray-400 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-[#333] hover:text-gray-700 dark:hover:text-gray-200 transition-colors cursor-pointer"
+          aria-label="Toggle dark mode"
+          title={isDark ? 'Light mode' : 'Dark mode'}
+        >
+          {isDark ? (
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+          ) : (
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+            </svg>
+          )}
+        </button>
+
         {/* Profile */}
         <button
           onClick={onOpenProfile}
-          className="w-9 h-9 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center hover:bg-gray-200 hover:text-gray-700 transition-colors cursor-pointer"
+          className="w-9 h-9 rounded-full bg-gray-100 dark:bg-[#2a2a2a] text-gray-500 dark:text-gray-400 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-[#333] hover:text-gray-700 dark:hover:text-gray-200 transition-colors cursor-pointer"
           aria-label="Profile"
           title="Profile"
         >
@@ -85,22 +105,41 @@ export default function Sidebar({ onAddNote, onOpenProfile }: SidebarProps) {
       </aside>
 
       {/* Mobile bottom bar */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-100 px-4 py-3 flex items-center justify-between">
-        <button
-          onClick={onOpenProfile}
-          className="w-8 h-8 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center hover:bg-gray-200 transition-colors cursor-pointer"
-          aria-label="Profile"
-        >
-          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-          </svg>
-        </button>
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white dark:bg-[#1a1a1a] border-t border-gray-100 dark:border-[#2a2a2a] px-4 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={onOpenProfile}
+            className="w-8 h-8 rounded-full bg-gray-100 dark:bg-[#2a2a2a] text-gray-500 dark:text-gray-400 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-[#333] transition-colors cursor-pointer"
+            aria-label="Profile"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+          </button>
+
+          {/* Dark mode toggle (mobile) */}
+          <button
+            onClick={toggleDark}
+            className="w-8 h-8 rounded-full bg-gray-100 dark:bg-[#2a2a2a] text-gray-500 dark:text-gray-400 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-[#333] transition-colors cursor-pointer"
+            aria-label="Toggle dark mode"
+          >
+            {isDark ? (
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+            ) : (
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+              </svg>
+            )}
+          </button>
+        </div>
 
         <div className="flex items-center gap-3">
           <button
             onClick={() => dispatch({ type: 'TOGGLE_FAVORITES' })}
             className={`w-5 h-5 flex items-center justify-center transition-all cursor-pointer ${
-              state.showFavorites ? 'text-gray-900' : 'text-gray-400'
+              state.showFavorites ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-500'
             }`}
             aria-label="Toggle favorites"
           >
@@ -114,7 +153,7 @@ export default function Sidebar({ onAddNote, onOpenProfile }: SidebarProps) {
               onClick={() => handleColorClick(color)}
               className={`w-4 h-4 rounded-full ${NOTE_COLORS[color].dot} transition-all cursor-pointer ${
                 state.activeColor === color
-                  ? 'ring-2 ring-offset-1 ring-gray-400 scale-110'
+                  ? 'ring-2 ring-offset-1 ring-gray-400 dark:ring-gray-500 scale-110'
                   : ''
               }`}
               aria-label={`Filter by ${NOTE_COLORS[color].label}`}
@@ -124,7 +163,7 @@ export default function Sidebar({ onAddNote, onOpenProfile }: SidebarProps) {
 
         <button
           onClick={onAddNote}
-          className="w-9 h-9 rounded-full bg-gray-900 text-white flex items-center justify-center text-lg hover:bg-gray-700 transition-colors cursor-pointer shadow-md"
+          className="w-9 h-9 rounded-full bg-gray-900 dark:bg-white text-white dark:text-gray-900 flex items-center justify-center text-lg hover:bg-gray-700 dark:hover:bg-gray-200 transition-colors cursor-pointer shadow-md"
           aria-label="Add note"
         >
           +

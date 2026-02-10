@@ -21,7 +21,7 @@ function formatDate(dateStr: string): string {
 export default function NoteCard({ note, index, onEdit, onDelete, onToggleFavorite }: NoteCardProps) {
   return (
     <div
-      className={`note-card ${NOTE_COLORS[note.color].bg} rounded-2xl p-5 min-h-[180px] flex flex-col justify-between relative group transition-all duration-200 hover:scale-[1.02] hover:shadow-lg cursor-pointer`}
+      className={`note-card ${NOTE_COLORS[note.color].bg} rounded-2xl p-5 min-h-[180px] flex flex-col justify-between relative group transition-all duration-200 hover:scale-[1.02] hover:shadow-lg dark:hover:shadow-black/30 cursor-pointer dark:opacity-90`}
       style={{ animationDelay: `${index * 50}ms` }}
       onClick={() => onEdit(note)}
     >

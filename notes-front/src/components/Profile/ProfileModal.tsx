@@ -70,15 +70,15 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-fade-in"
       onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
     >
-      <div className="bg-white rounded-2xl p-6 w-full max-w-md mx-4 shadow-xl animate-modal-in">
+      <div className="bg-white dark:bg-[#1a1a1a] rounded-2xl p-6 w-full max-w-md mx-4 shadow-xl dark:shadow-black/40 animate-modal-in">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-semibold text-gray-900">Profile</h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Profile</h2>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors cursor-pointer"
+            className="w-8 h-8 rounded-full bg-gray-100 dark:bg-[#2a2a2a] flex items-center justify-center hover:bg-gray-200 dark:hover:bg-[#333] transition-colors cursor-pointer"
           >
-            <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
@@ -86,26 +86,26 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
 
         {/* Email (readonly) */}
         <div className="mb-5">
-          <label className="text-xs text-gray-500 font-medium mb-1 block">Email</label>
-          <div className="px-4 py-2.5 rounded-lg bg-gray-50 text-sm text-gray-400 border border-gray-100">
+          <label className="text-xs text-gray-500 dark:text-gray-400 font-medium mb-1 block">Email</label>
+          <div className="px-4 py-2.5 rounded-lg bg-gray-50 dark:bg-[#111111] text-sm text-gray-400 dark:text-gray-500 border border-gray-100 dark:border-[#2a2a2a]">
             {user.email}
           </div>
         </div>
 
         {/* Update name */}
         <form onSubmit={handleUpdateProfile} className="mb-6">
-          <label className="text-xs text-gray-500 font-medium mb-1 block">Name</label>
+          <label className="text-xs text-gray-500 dark:text-gray-400 font-medium mb-1 block">Name</label>
           <div className="flex gap-2">
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="flex-1 px-4 py-2.5 rounded-lg bg-gray-50 text-sm text-gray-700 border border-gray-200 outline-none focus:border-gray-400 transition-colors"
+              className="flex-1 px-4 py-2.5 rounded-lg bg-gray-50 dark:bg-[#111111] text-sm text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-[#333] outline-none focus:border-gray-400 dark:focus:border-gray-500 transition-colors"
             />
             <button
               type="submit"
               disabled={loading || !name.trim()}
-              className="px-4 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-40 cursor-pointer"
+              className="px-4 py-2.5 bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-sm font-medium rounded-lg hover:bg-gray-700 dark:hover:bg-gray-200 transition-colors disabled:opacity-40 cursor-pointer"
             >
               Save
             </button>
@@ -114,26 +114,26 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
 
         {/* Change password */}
         <form onSubmit={handleChangePassword}>
-          <label className="text-xs text-gray-500 font-medium mb-1 block">Change password</label>
+          <label className="text-xs text-gray-500 dark:text-gray-400 font-medium mb-1 block">Change password</label>
           <div className="flex flex-col gap-2">
             <input
               type="password"
               placeholder="Current password"
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-lg bg-gray-50 text-sm text-gray-700 placeholder-gray-400 border border-gray-200 outline-none focus:border-gray-400 transition-colors"
+              className="w-full px-4 py-2.5 rounded-lg bg-gray-50 dark:bg-[#111111] text-sm text-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 border border-gray-200 dark:border-[#333] outline-none focus:border-gray-400 dark:focus:border-gray-500 transition-colors"
             />
             <input
               type="password"
               placeholder="New password (min 6 chars)"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-lg bg-gray-50 text-sm text-gray-700 placeholder-gray-400 border border-gray-200 outline-none focus:border-gray-400 transition-colors"
+              className="w-full px-4 py-2.5 rounded-lg bg-gray-50 dark:bg-[#111111] text-sm text-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 border border-gray-200 dark:border-[#333] outline-none focus:border-gray-400 dark:focus:border-gray-500 transition-colors"
             />
             <button
               type="submit"
               disabled={loading || !currentPassword || !newPassword}
-              className="w-full py-2.5 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-40 cursor-pointer"
+              className="w-full py-2.5 bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-sm font-medium rounded-lg hover:bg-gray-700 dark:hover:bg-gray-200 transition-colors disabled:opacity-40 cursor-pointer"
             >
               Change password
             </button>
@@ -141,7 +141,7 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
         </form>
 
         {/* Logout */}
-        <div className="mt-6 pt-4 border-t border-gray-100">
+        <div className="mt-6 pt-4 border-t border-gray-100 dark:border-[#2a2a2a]">
           <button
             onClick={() => { logout(); onClose() }}
             className="w-full py-2.5 text-red-500 text-sm font-medium hover:text-red-600 transition-colors cursor-pointer"
