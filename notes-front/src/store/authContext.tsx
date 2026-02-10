@@ -1,6 +1,13 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react'
-import { getToken, removeToken } from '../api/client'
-import { login as apiLogin, register as apiRegister, getMe, type UserInfo } from '../api/auth'
+import { setAccessToken } from '../api/client'
+import {
+  login as apiLogin,
+  register as apiRegister,
+  logout as apiLogout,
+  refreshToken,
+  getMe,
+  type UserInfo,
+} from '../api/auth'
 
 interface AuthState {
   user: UserInfo | null
@@ -20,20 +27,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserInfo | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
-  // Check existing token on mount
+  // On mount: try to refresh token (cookie will be sent automatically)
+  // If refresh succeeds, we get a new access token + user info
   useEffect(() => {
-    const token = getToken()
-    if (!token) {
-      setIsLoading(false)
-      return
-    }
-
-    getMe()
+    refreshToken()
+      .then((res) => {
+        setUser({ id: res.user.id, email: res.user.email, name: res.user.name, createdAt: '' })
+        // Now fetch full user info
+        return getMe()
+      })
       .then(setUser)
       .catch(() => {
-        removeToken()
+        setAccessToken(null)
       })
       .finally(() => setIsLoading(false))
+  }, [])
+
+  // Listen for forced logout (e.g. when refresh fails in interceptor)
+  useEffect(() => {
+    const handleForceLogout = () => {
+      setUser(null)
+      setAccessToken(null)
+    }
+
+    window.addEventListener('auth:logout', handleForceLogout)
+    return () => window.removeEventListener('auth:logout', handleForceLogout)
   }, [])
 
   const login = useCallback(async (email: string, password: string) => {
@@ -46,8 +64,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser({ id: res.user.id, email: res.user.email, name: res.user.name, createdAt: '' })
   }, [])
 
-  const logout = useCallback(() => {
-    removeToken()
+  const logout = useCallback(async () => {
+    await apiLogout()
     setUser(null)
   }, [])
 
