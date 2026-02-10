@@ -1,8 +1,17 @@
+import { NotesProvider } from './store/notesContext'
+import Layout from './components/Layout/Layout'
+
 function App() {
+  const handleAddNote = () => {
+    // TODO: implement note creation modal
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <h1 className="text-3xl font-bold p-8">Notes App</h1>
-    </div>
+    <NotesProvider>
+      <Layout onAddNote={handleAddNote}>
+        <p className="text-gray-400">Notes grid coming soon...</p>
+      </Layout>
+    </NotesProvider>
   )
 }
 
