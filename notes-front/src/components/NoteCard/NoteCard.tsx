@@ -3,6 +3,7 @@ import { NOTE_COLORS } from '../../types'
 
 interface NoteCardProps {
   note: Note
+  index: number
   onEdit: (note: Note) => void
   onDelete: (id: string) => void
 }
@@ -16,10 +17,11 @@ function formatDate(dateStr: string): string {
   })
 }
 
-export default function NoteCard({ note, onEdit, onDelete }: NoteCardProps) {
+export default function NoteCard({ note, index, onEdit, onDelete }: NoteCardProps) {
   return (
     <div
-      className={`${NOTE_COLORS[note.color].bg} rounded-2xl p-5 min-h-[180px] flex flex-col justify-between relative group transition-transform hover:scale-[1.02] cursor-pointer`}
+      className={`note-card ${NOTE_COLORS[note.color].bg} rounded-2xl p-5 min-h-[180px] flex flex-col justify-between relative group transition-all duration-200 hover:scale-[1.02] hover:shadow-lg cursor-pointer`}
+      style={{ animationDelay: `${index * 50}ms` }}
       onClick={() => onEdit(note)}
     >
       {/* Content */}
@@ -27,13 +29,18 @@ export default function NoteCard({ note, onEdit, onDelete }: NoteCardProps) {
         <p className="text-gray-800 font-medium text-sm leading-relaxed line-clamp-6">
           {note.title}
         </p>
+        {note.content && (
+          <p className="text-gray-600/80 text-xs mt-2 leading-relaxed line-clamp-3">
+            {note.content}
+          </p>
+        )}
       </div>
 
       {/* Footer */}
       <div className="flex items-center justify-between mt-4">
         <span className="text-xs text-gray-600/70">{formatDate(note.createdAt)}</span>
 
-        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           {/* Edit button */}
           <button
             onClick={(e) => {

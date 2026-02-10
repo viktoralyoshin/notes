@@ -10,7 +10,7 @@ interface NoteGridProps {
 export default function NoteGrid({ notes, onEdit, onDelete }: NoteGridProps) {
   if (notes.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-gray-400">
+      <div className="flex flex-col items-center justify-center py-20 text-gray-400 animate-fade-in">
         <svg className="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path
             strokeLinecap="round"
@@ -27,10 +27,11 @@ export default function NoteGrid({ notes, onEdit, onDelete }: NoteGridProps) {
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-      {notes.map((note) => (
+      {notes.map((note, index) => (
         <NoteCard
           key={note.id}
           note={note}
+          index={index}
           onEdit={onEdit}
           onDelete={onDelete}
         />
