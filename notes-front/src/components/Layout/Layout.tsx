@@ -6,12 +6,13 @@ import SortDropdown from '../SortDropdown/SortDropdown'
 interface LayoutProps {
   children: ReactNode
   onAddNote: () => void
+  onOpenProfile: () => void
 }
 
-export default function Layout({ children, onAddNote }: LayoutProps) {
+export default function Layout({ children, onAddNote, onOpenProfile }: LayoutProps) {
   return (
     <div className="flex min-h-screen bg-gray-50">
-      <Sidebar onAddNote={onAddNote} />
+      <Sidebar onAddNote={onAddNote} onOpenProfile={onOpenProfile} />
 
       <main className="flex-1 px-4 md:px-8 py-6 md:py-8 pb-20 md:pb-8">
         {/* Header */}

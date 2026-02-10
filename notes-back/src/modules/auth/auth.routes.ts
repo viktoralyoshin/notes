@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify'
-import { registerSchema, loginSchema } from './auth.schema.js'
-import { registerUser, loginUser, refreshTokens, logoutUser, getMe } from './auth.service.js'
+import { registerSchema, loginSchema, updateProfileSchema, changePasswordSchema } from './auth.schema.js'
+import { registerUser, loginUser, refreshTokens, logoutUser, getMe, updateProfile, changePassword } from './auth.service.js'
 import type { JwtPayload } from '../../types/index.js'
 
 export default async function authRoutes(fastify: FastifyInstance) {
@@ -68,6 +68,38 @@ export default async function authRoutes(fastify: FastifyInstance) {
       const { id } = request.user as JwtPayload
       const user = await getMe(fastify, id)
       return reply.send(user)
+    } catch (err: any) {
+      return reply.status(err.statusCode || 500).send({ error: err.message })
+    }
+  })
+
+  // PATCH /api/auth/profile
+  fastify.patch('/profile', { preHandler: [fastify.authenticate] }, async (request, reply) => {
+    const parsed = updateProfileSchema.safeParse(request.body)
+    if (!parsed.success) {
+      return reply.status(400).send({ error: 'Validation error', details: parsed.error.flatten() })
+    }
+
+    try {
+      const { id } = request.user as JwtPayload
+      const user = await updateProfile(fastify, id, parsed.data)
+      return reply.send(user)
+    } catch (err: any) {
+      return reply.status(err.statusCode || 500).send({ error: err.message })
+    }
+  })
+
+  // PATCH /api/auth/password
+  fastify.patch('/password', { preHandler: [fastify.authenticate] }, async (request, reply) => {
+    const parsed = changePasswordSchema.safeParse(request.body)
+    if (!parsed.success) {
+      return reply.status(400).send({ error: 'Validation error', details: parsed.error.flatten() })
+    }
+
+    try {
+      const { id } = request.user as JwtPayload
+      const result = await changePassword(fastify, id, parsed.data)
+      return reply.send(result)
     } catch (err: any) {
       return reply.status(err.statusCode || 500).send({ error: err.message })
     }

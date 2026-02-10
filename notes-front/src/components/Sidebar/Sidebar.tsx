@@ -1,16 +1,15 @@
 import { useNotes } from '../../store/notesContext'
-import { useAuth } from '../../store/authContext'
 import { NOTE_COLORS, type NoteColor } from '../../types'
 
 interface SidebarProps {
   onAddNote: () => void
+  onOpenProfile: () => void
 }
 
 const colorOrder: NoteColor[] = ['yellow', 'orange', 'purple', 'blue', 'green']
 
-export default function Sidebar({ onAddNote }: SidebarProps) {
+export default function Sidebar({ onAddNote, onOpenProfile }: SidebarProps) {
   const { state, dispatch } = useNotes()
-  const { logout } = useAuth()
 
   const handleColorClick = (color: NoteColor) => {
     dispatch({
@@ -72,15 +71,15 @@ export default function Sidebar({ onAddNote }: SidebarProps) {
         {/* Spacer */}
         <div className="flex-1" />
 
-        {/* Logout */}
+        {/* Profile */}
         <button
-          onClick={logout}
+          onClick={onOpenProfile}
           className="w-9 h-9 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center hover:bg-gray-200 hover:text-gray-700 transition-colors cursor-pointer"
-          aria-label="Logout"
-          title="Logout"
+          aria-label="Profile"
+          title="Profile"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
           </svg>
         </button>
       </aside>
@@ -88,12 +87,12 @@ export default function Sidebar({ onAddNote }: SidebarProps) {
       {/* Mobile bottom bar */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-100 px-4 py-3 flex items-center justify-between">
         <button
-          onClick={logout}
+          onClick={onOpenProfile}
           className="w-8 h-8 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center hover:bg-gray-200 transition-colors cursor-pointer"
-          aria-label="Logout"
+          aria-label="Profile"
         >
           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
           </svg>
         </button>
 

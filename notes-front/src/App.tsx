@@ -6,6 +6,7 @@ import Layout from './components/Layout/Layout'
 import NoteGrid from './components/NoteGrid/NoteGrid'
 import NoteEditor from './components/NoteEditor/NoteEditor'
 import ConfirmDialog from './components/ConfirmDialog/ConfirmDialog'
+import ProfileModal from './components/Profile/ProfileModal'
 import AuthPage from './components/Auth/AuthPage'
 import type { Note, NoteColor } from './types'
 
@@ -14,6 +15,7 @@ function NotesApp() {
   const [editorOpen, setEditorOpen] = useState(false)
   const [editingNote, setEditingNote] = useState<Note | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
+  const [profileOpen, setProfileOpen] = useState(false)
 
   const handleAddNote = () => {
     setEditingNote(null)
@@ -56,7 +58,7 @@ function NotesApp() {
 
   return (
     <>
-      <Layout onAddNote={handleAddNote}>
+      <Layout onAddNote={handleAddNote} onOpenProfile={() => setProfileOpen(true)}>
         <NoteGrid
           notes={filteredNotes}
           isLoading={state.isLoading}
@@ -77,6 +79,10 @@ function NotesApp() {
         message="Are you sure you want to delete this note? This action cannot be undone."
         onConfirm={handleDeleteConfirm}
         onCancel={() => setDeleteTarget(null)}
+      />
+      <ProfileModal
+        isOpen={profileOpen}
+        onClose={() => setProfileOpen(false)}
       />
     </>
   )

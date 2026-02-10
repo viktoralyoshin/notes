@@ -1,7 +1,7 @@
 import crypto from 'node:crypto'
 import bcrypt from 'bcrypt'
 import type { FastifyInstance, FastifyReply } from 'fastify'
-import type { RegisterInput, LoginInput } from './auth.schema.js'
+import type { RegisterInput, LoginInput, UpdateProfileInput, ChangePasswordInput } from './auth.schema.js'
 
 const SALT_ROUNDS = 10
 const ACCESS_TOKEN_EXPIRES = '15m'
@@ -154,4 +154,33 @@ export async function getMe(fastify: FastifyInstance, userId: string) {
   }
 
   return user
+}
+
+export async function updateProfile(fastify: FastifyInstance, userId: string, input: UpdateProfileInput) {
+  const user = await fastify.prisma.user.update({
+    where: { id: userId },
+    data: { name: input.name },
+    select: { id: true, email: true, name: true, createdAt: true },
+  })
+  return user
+}
+
+export async function changePassword(fastify: FastifyInstance, userId: string, input: ChangePasswordInput) {
+  const user = await fastify.prisma.user.findUnique({ where: { id: userId } })
+  if (!user) {
+    throw { statusCode: 404, message: 'User not found' }
+  }
+
+  const valid = await bcrypt.compare(input.currentPassword, user.password)
+  if (!valid) {
+    throw { statusCode: 400, message: 'Current password is incorrect' }
+  }
+
+  const hashedPassword = await bcrypt.hash(input.newPassword, SALT_ROUNDS)
+  await fastify.prisma.user.update({
+    where: { id: userId },
+    data: { password: hashedPassword },
+  })
+
+  return { success: true }
 }

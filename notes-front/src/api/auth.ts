@@ -42,3 +42,11 @@ export async function refreshToken(): Promise<AuthResponse> {
   setAccessToken(res.accessToken)
   return res
 }
+
+export async function updateProfile(name: string): Promise<UserInfo> {
+  return api.patch<UserInfo>('/auth/profile', { name })
+}
+
+export async function changePassword(currentPassword: string, newPassword: string): Promise<{ success: boolean }> {
+  return api.patch<{ success: boolean }>('/auth/password', { currentPassword, newPassword })
+}
