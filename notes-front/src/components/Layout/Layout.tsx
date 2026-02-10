@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import Sidebar from '../Sidebar/Sidebar'
 import SearchBar from '../SearchBar/SearchBar'
+import SortDropdown from '../SortDropdown/SortDropdown'
 
 interface LayoutProps {
   children: ReactNode
@@ -18,8 +19,11 @@ export default function Layout({ children, onAddNote }: LayoutProps) {
           <SearchBar />
         </div>
 
-        {/* Title */}
-        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6 md:mb-8">Notes</h1>
+        {/* Title + Sort */}
+        <div className="flex items-center justify-between mb-6 md:mb-8">
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900">Notes</h1>
+          <SortDropdown />
+        </div>
 
         {/* Content */}
         {children}

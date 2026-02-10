@@ -1,5 +1,5 @@
 import { createContext, useContext, useReducer, useEffect, useCallback, type ReactNode } from 'react'
-import type { Note, NoteColor } from '../types'
+import type { Note, NoteColor, SortOption } from '../types'
 import * as notesApi from '../api/notes'
 
 // --- State ---
@@ -9,6 +9,7 @@ interface NotesState {
   searchQuery: string
   activeColor: NoteColor | null
   showFavorites: boolean
+  sortBy: SortOption
   isLoading: boolean
 }
 
@@ -17,6 +18,7 @@ const initialState: NotesState = {
   searchQuery: '',
   activeColor: null,
   showFavorites: false,
+  sortBy: 'newest',
   isLoading: true,
 }
 
@@ -30,6 +32,7 @@ type NotesAction =
   | { type: 'SET_SEARCH_QUERY'; payload: string }
   | { type: 'SET_ACTIVE_COLOR'; payload: NoteColor | null }
   | { type: 'TOGGLE_FAVORITES' }
+  | { type: 'SET_SORT'; payload: SortOption }
   | { type: 'SET_LOADING'; payload: boolean }
 
 function notesReducer(state: NotesState, action: NotesAction): NotesState {
@@ -56,6 +59,8 @@ function notesReducer(state: NotesState, action: NotesAction): NotesState {
       return { ...state, activeColor: action.payload }
     case 'TOGGLE_FAVORITES':
       return { ...state, showFavorites: !state.showFavorites }
+    case 'SET_SORT':
+      return { ...state, sortBy: action.payload }
     case 'SET_LOADING':
       return { ...state, isLoading: action.payload }
     default:
@@ -118,16 +123,35 @@ export function NotesProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'DELETE_NOTE', payload: id })
   }, [])
 
-  // Compute filtered notes
-  const filteredNotes = state.notes.filter((note) => {
-    const matchesColor = !state.activeColor || note.color === state.activeColor
-    const matchesFavorite = !state.showFavorites || note.isFavorite
-    const matchesSearch =
-      !state.searchQuery ||
-      note.title.toLowerCase().includes(state.searchQuery.toLowerCase()) ||
-      note.content.toLowerCase().includes(state.searchQuery.toLowerCase())
-    return matchesColor && matchesFavorite && matchesSearch
-  })
+  // Compute filtered & sorted notes
+  const colorOrder: Record<string, number> = { yellow: 0, orange: 1, purple: 2, blue: 3, green: 4 }
+
+  const filteredNotes = state.notes
+    .filter((note) => {
+      const matchesColor = !state.activeColor || note.color === state.activeColor
+      const matchesFavorite = !state.showFavorites || note.isFavorite
+      const matchesSearch =
+        !state.searchQuery ||
+        note.title.toLowerCase().includes(state.searchQuery.toLowerCase()) ||
+        note.content.toLowerCase().includes(state.searchQuery.toLowerCase())
+      return matchesColor && matchesFavorite && matchesSearch
+    })
+    .sort((a, b) => {
+      switch (state.sortBy) {
+        case 'newest':
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        case 'oldest':
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        case 'title-asc':
+          return a.title.localeCompare(b.title)
+        case 'title-desc':
+          return b.title.localeCompare(a.title)
+        case 'color':
+          return (colorOrder[a.color] ?? 99) - (colorOrder[b.color] ?? 99)
+        default:
+          return 0
+      }
+    })
 
   return (
     <NotesContext.Provider value={{ state, dispatch, filteredNotes, loadNotes, addNote, editNote, toggleFavorite, removeNote }}>

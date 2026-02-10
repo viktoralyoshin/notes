@@ -1,5 +1,7 @@
 export type NoteColor = 'yellow' | 'orange' | 'purple' | 'green' | 'blue'
 
+export type SortOption = 'newest' | 'oldest' | 'title-asc' | 'title-desc' | 'color'
+
 export interface Note {
   id: string
   title: string
