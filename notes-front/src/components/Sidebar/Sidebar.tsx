@@ -27,9 +27,14 @@ export default function Sidebar({ onAddNote, onOpenProfile }: SidebarProps) {
   }
 
   const handleFolderClick = (folderId: string) => {
+    const newActiveFolderId = foldersState.activeFolderId === folderId ? null : folderId
     foldersDispatch({
       type: 'SET_ACTIVE_FOLDER',
-      payload: foldersState.activeFolderId === folderId ? null : folderId,
+      payload: newActiveFolderId,
+    })
+    dispatch({
+      type: 'SET_ACTIVE_FOLDER',
+      payload: newActiveFolderId,
     })
   }
 

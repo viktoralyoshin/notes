@@ -1,7 +1,6 @@
 import { createContext, useContext, useReducer, useEffect, useCallback, type ReactNode } from 'react'
 import type { Note, NoteColor, SortOption } from '../types'
 import * as notesApi from '../api/notes'
-import { useFolders } from './foldersContext'
 
 // --- State ---
 
@@ -9,6 +8,7 @@ interface NotesState {
   notes: Note[]
   searchQuery: string
   activeColor: NoteColor | null
+  activeFolderId: string | null
   showFavorites: boolean
   sortBy: SortOption
   isLoading: boolean
@@ -18,6 +18,7 @@ const initialState: NotesState = {
   notes: [],
   searchQuery: '',
   activeColor: null,
+  activeFolderId: null,
   showFavorites: false,
   sortBy: 'manual',
   isLoading: true,
@@ -33,6 +34,7 @@ type NotesAction =
   | { type: 'REORDER_NOTES'; payload: Note[] }
   | { type: 'SET_SEARCH_QUERY'; payload: string }
   | { type: 'SET_ACTIVE_COLOR'; payload: NoteColor | null }
+  | { type: 'SET_ACTIVE_FOLDER'; payload: string | null }
   | { type: 'TOGGLE_FAVORITES' }
   | { type: 'SET_SORT'; payload: SortOption }
   | { type: 'SET_LOADING'; payload: boolean }
@@ -61,6 +63,8 @@ function notesReducer(state: NotesState, action: NotesAction): NotesState {
       return { ...state, searchQuery: action.payload }
     case 'SET_ACTIVE_COLOR':
       return { ...state, activeColor: action.payload }
+    case 'SET_ACTIVE_FOLDER':
+      return { ...state, activeFolderId: action.payload }
     case 'TOGGLE_FAVORITES':
       return { ...state, showFavorites: !state.showFavorites }
     case 'SET_SORT':
@@ -89,7 +93,6 @@ interface NotesContextValue {
 const NotesContext = createContext<NotesContextValue | null>(null)
 
 export function NotesProvider({ children }: { children: ReactNode }) {
-  const { state: foldersState } = useFolders()
   const [state, dispatch] = useReducer(notesReducer, initialState)
 
   const loadNotes = useCallback(async () => {
@@ -149,7 +152,7 @@ export function NotesProvider({ children }: { children: ReactNode }) {
     .filter((note) => {
       const matchesColor = !state.activeColor || note.color === state.activeColor
       const matchesFavorite = !state.showFavorites || note.isFavorite
-      const matchesFolder = foldersState.activeFolderId === null || note.folderId === foldersState.activeFolderId
+      const matchesFolder = state.activeFolderId === null || note.folderId === state.activeFolderId
       const matchesSearch =
         !state.searchQuery ||
         note.title.toLowerCase().includes(state.searchQuery.toLowerCase()) ||
