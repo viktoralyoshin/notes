@@ -8,6 +8,7 @@ import NoteGrid from './components/NoteGrid/NoteGrid'
 import NoteEditor from './components/NoteEditor/NoteEditor'
 import ConfirmDialog from './components/ConfirmDialog/ConfirmDialog'
 import ProfileModal from './components/Profile/ProfileModal'
+import ShareDialog from './components/ShareDialog/ShareDialog'
 import AuthPage from './components/Auth/AuthPage'
 import type { Note, NoteColor } from './types'
 
@@ -17,6 +18,8 @@ function NotesApp() {
   const [editingNote, setEditingNote] = useState<Note | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
   const [profileOpen, setProfileOpen] = useState(false)
+  const [shareDialogOpen, setShareDialogOpen] = useState(false)
+  const [sharingNote, setSharingNote] = useState<Note | null>(null)
 
   const handleAddNote = () => {
     setEditingNote(null)
@@ -30,6 +33,11 @@ function NotesApp() {
 
   const handleDeleteRequest = (id: string) => {
     setDeleteTarget(id)
+  }
+
+  const handleShareRequest = (note: Note) => {
+    setSharingNote(note)
+    setShareDialogOpen(true)
   }
 
   const handleDeleteConfirm = async () => {
@@ -66,6 +74,7 @@ function NotesApp() {
           onEdit={handleEdit}
           onDelete={handleDeleteRequest}
           onToggleFavorite={toggleFavorite}
+          onShare={handleShareRequest}
         />
       </Layout>
       <NoteEditor
@@ -85,6 +94,13 @@ function NotesApp() {
         isOpen={profileOpen}
         onClose={() => setProfileOpen(false)}
       />
+      {sharingNote && (
+        <ShareDialog
+          noteId={sharingNote.id}
+          isOpen={shareDialogOpen}
+          onClose={() => setShareDialogOpen(false)}
+        />
+      )}
     </>
   )
 }

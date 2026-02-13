@@ -23,6 +23,7 @@ interface NoteGridProps {
   onEdit: (note: Note) => void
   onDelete: (id: string) => void
   onToggleFavorite: (id: string) => void
+  onShare?: (note: Note) => void
 }
 
 function SkeletonCard() {
@@ -35,7 +36,7 @@ function SkeletonCard() {
   )
 }
 
-export default function NoteGrid({ notes, isLoading, onEdit, onDelete, onToggleFavorite }: NoteGridProps) {
+export default function NoteGrid({ notes, isLoading, onEdit, onDelete, onToggleFavorite, onShare }: NoteGridProps) {
   const { state, reorderNotes } = useNotes()
   const [activeNote, setActiveNote] = useState<Note | null>(null)
 
@@ -114,6 +115,7 @@ export default function NoteGrid({ notes, isLoading, onEdit, onDelete, onToggleF
             onEdit={onEdit}
             onDelete={onDelete}
             onToggleFavorite={onToggleFavorite}
+            onShare={onShare}
           />
         ))}
       </div>
@@ -138,6 +140,7 @@ export default function NoteGrid({ notes, isLoading, onEdit, onDelete, onToggleF
               onEdit={onEdit}
               onDelete={onDelete}
               onToggleFavorite={onToggleFavorite}
+              onShare={onShare}
             />
           ))}
         </div>

@@ -34,21 +34,33 @@ model Folder {
 }
 
 model Note {
-  id          String       @id @default(uuid())
+  id          String      @id @default(uuid())
   title       String
-  content     String       @default("")
-  color       String       @default("yellow")
-  isFavorite  Boolean      @default(false) @map("is_favorite")
-  position    Int          @default(0)
-  folderId    String?      @map("folder_id")
-  folder      Folder?      @relation(fields: [folderId], references: [id], onDelete: SetNull)
-  userId      String       @map("user_id")
-  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content     String      @default("")
+  color       String      @default("yellow")
+  isFavorite  Boolean     @default(false) @map("is_favorite")
+  position    Int         @default(0)
+  folderId    String?     @map("folder_id")
+  folder      Folder?     @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  userId      String      @map("user_id")
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   attachments Attachment[]
-  createdAt   DateTime     @default(now()) @map("created_at")
-  updatedAt   DateTime     @updatedAt @map("updated_at")
+  shareLink   ShareLink?
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
 
   @@map("notes")
+}
+
+model ShareLink {
+  id        String    @id @default(uuid())
+  token     String    @unique @default(cuid())
+  noteId    String    @unique @map("note_id")
+  note      Note      @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  expiresAt DateTime? @map("expires_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  @@map("share_links")
 }
 
 model Attachment {

@@ -8,6 +8,7 @@ import authRoutes from "./modules/auth/auth.routes.js";
 import notesRoutes from "./modules/notes/notes.routes.js";
 import foldersRoutes from "./modules/folders/folders.routes.js";
 import attachmentsRoutes from "./modules/attachments/attachments.routes.js";
+import sharingRoutes from "./modules/sharing/sharing.routes.js";
 import { UPLOADS_DIR } from "./config/env.js";
 
 export async function buildApp() {
@@ -50,6 +51,7 @@ export async function buildApp() {
   await app.register(notesRoutes, { prefix: "/api/notes" });
   await app.register(foldersRoutes, { prefix: "/api/folders" });
   await app.register(attachmentsRoutes, { prefix: "/api/notes" });
+  await app.register(sharingRoutes, { prefix: "/api" });
 
   // Health check
   app.get("/api/health", async () => {
