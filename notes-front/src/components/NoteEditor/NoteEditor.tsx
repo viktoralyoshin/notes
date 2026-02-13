@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useFolders } from '../../store/foldersContext'
 import type { Note, NoteColor } from '../../types'
 import { NOTE_COLORS } from '../../types'
 
@@ -6,27 +7,31 @@ interface NoteEditorProps {
   note: Note | null
   isOpen: boolean
   onClose: () => void
-  onSave: (data: { title: string; content: string; color: NoteColor }) => void
+  onSave: (data: { title: string; content: string; color: NoteColor; folderId?: string | null }) => void
 }
 
 const colorOrder: NoteColor[] = ['yellow', 'orange', 'purple', 'green', 'blue']
 
 export default function NoteEditor({ note, isOpen, onClose, onSave }: NoteEditorProps) {
+  const { state: foldersState } = useFolders()
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [color, setColor] = useState<NoteColor>('yellow')
+  const [folderId, setFolderId] = useState<string | null>(null)
 
   useEffect(() => {
     if (note) {
       setTitle(note.title)
       setContent(note.content)
       setColor(note.color)
+      setFolderId(note.folderId)
     } else {
       setTitle('')
       setContent('')
       setColor('yellow')
+      setFolderId(foldersState.activeFolderId)
     }
-  }, [note, isOpen])
+  }, [note, isOpen, foldersState.activeFolderId])
 
   // Close on Escape
   useEffect(() => {
@@ -42,7 +47,7 @@ export default function NoteEditor({ note, isOpen, onClose, onSave }: NoteEditor
 
   const handleSave = () => {
     if (!title.trim()) return
-    onSave({ title: title.trim(), content: content.trim(), color })
+    onSave({ title: title.trim(), content: content.trim(), color, folderId })
     onClose()
   }
 
@@ -93,21 +98,41 @@ export default function NoteEditor({ note, isOpen, onClose, onSave }: NoteEditor
           className="w-full bg-transparent text-gray-700 text-sm placeholder-gray-500/60 outline-none resize-none mb-4"
         />
 
-        {/* Color picker */}
-        <div className="flex items-center gap-3 mb-5">
-          <span className="text-xs text-gray-600 font-medium">Color:</span>
-          {colorOrder.map((c) => (
-            <button
-              key={c}
-              onClick={() => setColor(c)}
-              className={`w-6 h-6 rounded-full ${NOTE_COLORS[c].dot} transition-all cursor-pointer ${
-                color === c
-                  ? 'ring-2 ring-offset-1 ring-gray-500 scale-110'
-                  : 'hover:scale-110'
-              }`}
-              aria-label={NOTE_COLORS[c].label}
-            />
-          ))}
+        {/* Folder & Color picker */}
+        <div className="flex flex-col gap-4 mb-5">
+          {/* Folder selector */}
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-gray-600 font-medium">Folder:</span>
+            <select
+              value={folderId || ''}
+              onChange={(e) => setFolderId(e.target.value || null)}
+              className="flex-1 bg-transparent text-gray-700 text-sm border-b border-black/10 pb-1 outline-none cursor-pointer"
+            >
+              <option value="">No folder</option>
+              {foldersState.folders.map((f) => (
+                <option key={f.id} value={f.id}>
+                  {f.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Color picker */}
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-gray-600 font-medium">Color:</span>
+            {colorOrder.map((c) => (
+              <button
+                key={c}
+                onClick={() => setColor(c)}
+                className={`w-6 h-6 rounded-full ${NOTE_COLORS[c].dot} transition-all cursor-pointer ${
+                  color === c
+                    ? 'ring-2 ring-offset-1 ring-gray-500 scale-110'
+                    : 'hover:scale-110'
+                }`}
+                aria-label={NOTE_COLORS[c].label}
+              />
+            ))}
+          </div>
         </div>
 
         {/* Actions */}

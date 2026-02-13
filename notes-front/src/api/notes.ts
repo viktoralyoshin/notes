@@ -8,6 +8,7 @@ interface ApiNote {
   color: string
   isFavorite: boolean
   position: number
+  folderId: string | null
   userId: string
   createdAt: string
   updatedAt: string
@@ -21,6 +22,7 @@ function toNote(apiNote: ApiNote): Note {
     color: apiNote.color as NoteColor,
     isFavorite: apiNote.isFavorite,
     position: apiNote.position,
+    folderId: apiNote.folderId,
     createdAt: apiNote.createdAt,
     updatedAt: apiNote.updatedAt,
   }
@@ -37,12 +39,12 @@ export async function fetchNotes(color?: NoteColor | null, search?: string): Pro
   return data.map(toNote)
 }
 
-export async function createNote(input: { title: string; content: string; color: NoteColor }): Promise<Note> {
+export async function createNote(input: { title: string; content: string; color: NoteColor; folderId?: string | null }): Promise<Note> {
   const data = await api.post<ApiNote>('/notes', input)
   return toNote(data)
 }
 
-export async function updateNote(id: string, input: { title?: string; content?: string; color?: NoteColor; isFavorite?: boolean }): Promise<Note> {
+export async function updateNote(id: string, input: { title?: string; content?: string; color?: NoteColor; isFavorite?: boolean; folderId?: string | null }): Promise<Note> {
   const data = await api.patch<ApiNote>(`/notes/${id}`, input)
   return toNote(data)
 }

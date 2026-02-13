@@ -7,6 +7,7 @@ export const createNoteSchema = z.object({
   content: z.string().default(''),
   color: noteColorEnum.default('yellow'),
   isFavorite: z.boolean().default(false),
+  folderId: z.string().uuid().nullable().optional(),
 })
 
 export const updateNoteSchema = z.object({
@@ -15,6 +16,7 @@ export const updateNoteSchema = z.object({
   color: noteColorEnum.optional(),
   isFavorite: z.boolean().optional(),
   position: z.number().int().min(0).optional(),
+  folderId: z.string().uuid().nullable().optional(),
 })
 
 export const reorderNotesSchema = z.object({
@@ -25,6 +27,7 @@ export const notesQuerySchema = z.object({
   color: noteColorEnum.optional(),
   search: z.string().optional(),
   favorite: z.enum(['true', 'false']).optional(),
+  folderId: z.string().uuid().optional(),
 })
 
 export type CreateNoteInput = z.infer<typeof createNoteSchema>

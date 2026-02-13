@@ -1,6 +1,7 @@
 import { createContext, useContext, useReducer, useEffect, useCallback, type ReactNode } from 'react'
 import type { Note, NoteColor, SortOption } from '../types'
 import * as notesApi from '../api/notes'
+import { useFolders } from './foldersContext'
 
 // --- State ---
 
@@ -78,8 +79,8 @@ interface NotesContextValue {
   dispatch: React.Dispatch<NotesAction>
   filteredNotes: Note[]
   loadNotes: () => Promise<void>
-  addNote: (input: { title: string; content: string; color: NoteColor }) => Promise<void>
-  editNote: (id: string, input: { title?: string; content?: string; color?: NoteColor }) => Promise<void>
+  addNote: (input: { title: string; content: string; color: NoteColor; folderId?: string | null }) => Promise<void>
+  editNote: (id: string, input: { title?: string; content?: string; color?: NoteColor; folderId?: string | null }) => Promise<void>
   toggleFavorite: (id: string) => Promise<void>
   removeNote: (id: string) => Promise<void>
   reorderNotes: (reorderedNotes: Note[]) => Promise<void>
@@ -88,6 +89,7 @@ interface NotesContextValue {
 const NotesContext = createContext<NotesContextValue | null>(null)
 
 export function NotesProvider({ children }: { children: ReactNode }) {
+  const { state: foldersState } = useFolders()
   const [state, dispatch] = useReducer(notesReducer, initialState)
 
   const loadNotes = useCallback(async () => {
@@ -105,12 +107,12 @@ export function NotesProvider({ children }: { children: ReactNode }) {
     loadNotes()
   }, [loadNotes])
 
-  const addNote = useCallback(async (input: { title: string; content: string; color: NoteColor }) => {
+  const addNote = useCallback(async (input: { title: string; content: string; color: NoteColor; folderId?: string | null }) => {
     const note = await notesApi.createNote(input)
     dispatch({ type: 'ADD_NOTE', payload: note })
   }, [])
 
-  const editNote = useCallback(async (id: string, input: { title?: string; content?: string; color?: NoteColor }) => {
+  const editNote = useCallback(async (id: string, input: { title?: string; content?: string; color?: NoteColor; folderId?: string | null }) => {
     const note = await notesApi.updateNote(id, input)
     dispatch({ type: 'UPDATE_NOTE', payload: note })
   }, [])
@@ -147,11 +149,12 @@ export function NotesProvider({ children }: { children: ReactNode }) {
     .filter((note) => {
       const matchesColor = !state.activeColor || note.color === state.activeColor
       const matchesFavorite = !state.showFavorites || note.isFavorite
+      const matchesFolder = foldersState.activeFolderId === null || note.folderId === foldersState.activeFolderId
       const matchesSearch =
         !state.searchQuery ||
         note.title.toLowerCase().includes(state.searchQuery.toLowerCase()) ||
         note.content.toLowerCase().includes(state.searchQuery.toLowerCase())
-      return matchesColor && matchesFavorite && matchesSearch
+      return matchesColor && matchesFavorite && matchesFolder && matchesSearch
     })
     .sort((a, b) => {
       switch (state.sortBy) {

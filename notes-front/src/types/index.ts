@@ -9,6 +9,16 @@ export interface Note {
   color: NoteColor
   isFavorite: boolean
   position: number
+  folderId: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface Folder {
+  id: string
+  name: string
+  position: number
+  userId: string
   createdAt: string
   updatedAt: string
 }

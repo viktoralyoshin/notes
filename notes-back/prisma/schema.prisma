@@ -13,10 +13,24 @@ model User {
   password      String
   name          String?
   notes         Note[]
+  folders       Folder[]
   refreshTokens RefreshToken[]
   createdAt     DateTime       @default(now()) @map("created_at")
 
   @@map("users")
+}
+
+model Folder {
+  id        String   @id @default(uuid())
+  name      String
+  position  Int      @default(0)
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  notes     Note[]
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("folders")
 }
 
 model Note {
@@ -26,6 +40,8 @@ model Note {
   color      String   @default("yellow")
   isFavorite Boolean  @default(false) @map("is_favorite")
   position   Int      @default(0)
+  folderId   String?  @map("folder_id")
+  folder     Folder?  @relation(fields: [folderId], references: [id], onDelete: SetNull)
   userId     String   @map("user_id")
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt  DateTime @default(now()) @map("created_at")

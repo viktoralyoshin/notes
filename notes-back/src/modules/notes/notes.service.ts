@@ -13,6 +13,10 @@ export async function getNotes(fastify: FastifyInstance, userId: string, query: 
     where.isFavorite = true
   }
 
+  if (query.folderId !== undefined) {
+    where.folderId = query.folderId || null
+  }
+
   if (query.search) {
     where.OR = [
       { title: { contains: query.search, mode: 'insensitive' } },
@@ -49,6 +53,7 @@ export async function createNote(fastify: FastifyInstance, userId: string, input
       content: input.content,
       color: input.color,
       isFavorite: input.isFavorite,
+      folderId: input.folderId,
       position: 0,
       userId,
     },

@@ -4,6 +4,7 @@ import prismaPlugin from "./plugins/prisma.js";
 import authPlugin from "./plugins/auth.js";
 import authRoutes from "./modules/auth/auth.routes.js";
 import notesRoutes from "./modules/notes/notes.routes.js";
+import foldersRoutes from "./modules/folders/folders.routes.js";
 
 export async function buildApp() {
   const app = Fastify({
@@ -30,6 +31,7 @@ export async function buildApp() {
   // Routes
   await app.register(authRoutes, { prefix: "/api/auth" });
   await app.register(notesRoutes, { prefix: "/api/notes" });
+  await app.register(foldersRoutes, { prefix: "/api/folders" });
 
   // Health check
   app.get("/api/health", async () => {

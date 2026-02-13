@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { toast } from 'sonner'
 import { AuthProvider, useAuth } from './store/authContext'
 import { NotesProvider, useNotes } from './store/notesContext'
+import { FoldersProvider } from './store/foldersContext'
 import Layout from './components/Layout/Layout'
 import NoteGrid from './components/NoteGrid/NoteGrid'
 import NoteEditor from './components/NoteEditor/NoteEditor'
@@ -42,7 +43,7 @@ function NotesApp() {
     setDeleteTarget(null)
   }
 
-  const handleSave = async (data: { title: string; content: string; color: NoteColor }) => {
+  const handleSave = async (data: { title: string; content: string; color: NoteColor; folderId?: string | null }) => {
     try {
       if (editingNote) {
         await editNote(editingNote.id, data)
@@ -104,9 +105,11 @@ function AppContent() {
   }
 
   return (
-    <NotesProvider>
-      <NotesApp />
-    </NotesProvider>
+    <FoldersProvider>
+      <NotesProvider>
+        <NotesApp />
+      </NotesProvider>
+    </FoldersProvider>
   )
 }
 
