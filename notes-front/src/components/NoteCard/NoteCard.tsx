@@ -31,7 +31,7 @@ const NoteCardContent = forwardRef<
     listeners?: Record<string, Function>
     attributes?: Record<string, any>
   }
->(({ note, index, isDragOverlay, style, isDragging, listeners, attributes, onEdit, onDelete, onToggleFavorite }, ref) => {
+>(({ note, index, isDragOverlay, style, isDragging, listeners, attributes, onEdit, onDelete, onToggleFavorite, onShare }, ref) => {
   return (
     <div
       ref={ref}
