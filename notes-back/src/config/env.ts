@@ -1,5 +1,9 @@
 import 'dotenv/config'
 import { z } from 'zod'
+import path from 'path'
+import { fileURLToPath } from 'url'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 const envSchema = z.object({
   DATABASE_URL: z.string(),
@@ -9,3 +13,6 @@ const envSchema = z.object({
 })
 
 export const env = envSchema.parse(process.env)
+
+// Uploads directory (absolute path)
+export const UPLOADS_DIR = path.resolve(__dirname, '../../uploads')

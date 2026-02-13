@@ -23,6 +23,16 @@ export interface Folder {
   updatedAt: string
 }
 
+export interface Attachment {
+  id: string
+  filename: string
+  originalName: string
+  mimeType: string
+  size: number
+  noteId: string
+  createdAt: string
+}
+
 export const NOTE_COLORS: Record<NoteColor, { bg: string; label: string; dot: string }> = {
   yellow: { bg: 'bg-note-yellow', label: 'Yellow', dot: 'bg-note-yellow' },
   orange: { bg: 'bg-note-orange', label: 'Orange', dot: 'bg-note-orange' },

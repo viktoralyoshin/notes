@@ -1,10 +1,14 @@
 import Fastify from "fastify";
 import cors from "@fastify/cors";
+import multipart from "@fastify/multipart";
+import staticFiles from "@fastify/static";
 import prismaPlugin from "./plugins/prisma.js";
 import authPlugin from "./plugins/auth.js";
 import authRoutes from "./modules/auth/auth.routes.js";
 import notesRoutes from "./modules/notes/notes.routes.js";
 import foldersRoutes from "./modules/folders/folders.routes.js";
+import attachmentsRoutes from "./modules/attachments/attachments.routes.js";
+import { UPLOADS_DIR } from "./config/env.js";
 
 export async function buildApp() {
   const app = Fastify({
@@ -24,6 +28,19 @@ export async function buildApp() {
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
+  // File upload support
+  await app.register(multipart, {
+    limits: {
+      fileSize: 10 * 1024 * 1024, // 10MB
+    },
+  });
+
+  // Static files (uploads)
+  await app.register(staticFiles, {
+    root: UPLOADS_DIR,
+    prefix: '/uploads/',
+  });
+
   // Plugins
   await app.register(prismaPlugin);
   await app.register(authPlugin);
@@ -32,6 +49,7 @@ export async function buildApp() {
   await app.register(authRoutes, { prefix: "/api/auth" });
   await app.register(notesRoutes, { prefix: "/api/notes" });
   await app.register(foldersRoutes, { prefix: "/api/folders" });
+  await app.register(attachmentsRoutes, { prefix: "/api/notes" });
 
   // Health check
   app.get("/api/health", async () => {

@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react'
+import { toast } from 'sonner'
 import { useFolders } from '../../store/foldersContext'
-import type { Note, NoteColor } from '../../types'
+import type { Note, NoteColor, Attachment } from '../../types'
 import { NOTE_COLORS } from '../../types'
+import * as attachmentsApi from '../../api/attachments'
 
 interface NoteEditorProps {
   note: Note | null
@@ -18,6 +20,8 @@ export default function NoteEditor({ note, isOpen, onClose, onSave }: NoteEditor
   const [content, setContent] = useState('')
   const [color, setColor] = useState<NoteColor>('yellow')
   const [folderId, setFolderId] = useState<string | null>(null)
+  const [attachments, setAttachments] = useState<Attachment[]>([])
+  const [uploading, setUploading] = useState(false)
 
   useEffect(() => {
     if (note) {
@@ -25,13 +29,53 @@ export default function NoteEditor({ note, isOpen, onClose, onSave }: NoteEditor
       setContent(note.content)
       setColor(note.color)
       setFolderId(note.folderId)
+      // Load attachments
+      loadAttachments(note.id)
     } else {
       setTitle('')
       setContent('')
       setColor('yellow')
       setFolderId(foldersState.activeFolderId)
+      setAttachments([])
     }
   }, [note, isOpen, foldersState.activeFolderId])
+
+  const loadAttachments = async (noteId: string) => {
+    try {
+      const data = await attachmentsApi.getAttachments(noteId)
+      setAttachments(data)
+    } catch {
+      // Ignore errors, note might not exist yet
+    }
+  }
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || !note) return
+    const file = e.target.files[0]
+    if (!file) return
+
+    setUploading(true)
+    try {
+      const attachment = await attachmentsApi.uploadAttachment(note.id, file)
+      setAttachments([...attachments, attachment])
+      toast.success('File uploaded')
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to upload file')
+    } finally {
+      setUploading(false)
+      e.target.value = ''
+    }
+  }
+
+  const handleDeleteAttachment = async (attachmentId: string) => {
+    try {
+      await attachmentsApi.deleteAttachment(attachmentId)
+      setAttachments(attachments.filter((a) => a.id !== attachmentId))
+      toast.success('File deleted')
+    } catch {
+      toast.error('Failed to delete file')
+    }
+  }
 
   // Close on Escape
   useEffect(() => {
@@ -99,7 +143,7 @@ export default function NoteEditor({ note, isOpen, onClose, onSave }: NoteEditor
         />
 
         {/* Folder & Color picker */}
-        <div className="flex flex-col gap-4 mb-5">
+        <div className="flex flex-col gap-4 mb-4">
           {/* Folder selector */}
           <div className="flex items-center gap-3">
             <span className="text-xs text-gray-600 font-medium">Folder:</span>
@@ -134,6 +178,53 @@ export default function NoteEditor({ note, isOpen, onClose, onSave }: NoteEditor
             ))}
           </div>
         </div>
+
+        {/* Attachments */}
+        {note && (
+          <div className="mb-4 pb-4 border-b border-black/10">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs text-gray-600 font-medium">Attachments:</span>
+              <label className="px-3 py-1 text-xs bg-black/10 hover:bg-black/20 rounded cursor-pointer transition-colors">
+                {uploading ? 'Uploading...' : '+ Upload'}
+                <input
+                  type="file"
+                  onChange={handleFileUpload}
+                  disabled={uploading}
+                  className="hidden"
+                  accept="image/*,.pdf,.doc,.docx,.txt"
+                />
+              </label>
+            </div>
+            {attachments.length > 0 && (
+              <div className="flex flex-col gap-2">
+                {attachments.map((att) => (
+                  <div key={att.id} className="flex items-center gap-2 p-2 bg-black/5 rounded">
+                    {att.mimeType.startsWith('image/') && (
+                      <img
+                        src={attachmentsApi.getAttachmentUrl(att.filename)}
+                        alt={att.originalName}
+                        className="w-10 h-10 object-cover rounded"
+                      />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs text-gray-700 truncate">{att.originalName}</p>
+                      <p className="text-xs text-gray-500">{(att.size / 1024).toFixed(1)} KB</p>
+                    </div>
+                    <button
+                      onClick={() => handleDeleteAttachment(att.id)}
+                      className="w-6 h-6 rounded flex items-center justify-center hover:bg-red-500/20 transition-colors"
+                      aria-label="Delete"
+                    >
+                      <svg className="w-3 h-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Actions */}
         <div className="flex justify-end gap-3">
